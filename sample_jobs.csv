@@ -1,0 +1,9 @@
+id,title,required_skills,description,experience_required
+1,Senior Data Scientist,"Python,Machine Learning,TensorFlow,SQL","Join our AI team to build next-generation recommendation systems. Work with large-scale data and deploy models to production. PhD or 5+ years experience required.",5
+2,Full Stack Engineer,"JavaScript,React,Node.js,AWS","Build responsive web applications for our SaaS platform. Collaborate with product and design teams. Experience with cloud infrastructure essential.",5
+3,ML Research Engineer,"Python,PyTorch,NLP,Transformers","Push the boundaries of language model research. Publish papers and open-source code. Work with cutting-edge hardware and datasets.",3
+4,Data Analyst,"SQL,Excel,Tableau,Statistics","Analyze business metrics and create executive dashboards. Strong SQL skills and business acumen required. MBA preferred.",3
+5,Backend Engineer,"Java,Spring Boot,Kubernetes,Microservices","Design and implement scalable backend services. Experience with distributed systems and event-driven architecture. Cloud certification a plus.",5
+6,Computer Vision Engineer,"Python,C++,Deep Learning,Computer Vision","Develop perception algorithms for autonomous systems. Real-time processing experience required. Robotics background helpful.",4
+7,Data Engineer,"Python,SQL,Airflow,GCP,ETL","Build robust data pipelines and infrastructure. Work with streaming and batch processing. Strong coding skills essential.",4
+8,BI Developer,"SQL,Power BI,Data Warehousing,ETL","Create enterprise reporting solutions. Optimize data models for performance. Work with stakeholders across the organization.",6

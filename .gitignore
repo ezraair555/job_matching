@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Local config
+.env.local
+config.local.json
+
+# Data files (keep samples, ignore real data)
+data/*.csv
+data/*.xlsx
+!sample_candidates.csv
+!sample_jobs.csv

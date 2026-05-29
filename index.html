@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Matching Dashboard</title>
+    
+    <!-- DuckDB WASM -->
+    <script src="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.js"></script>
+    
+    <!-- Transformers.js for embeddings -->
+    <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0/dist/transformers.min.js"></script>
+    
+    <!-- SheetJS for Excel/CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .upload-zone:hover {
+            background: #f7fafc;
+            border-color: #764ba2;
+        }
+        
+        .upload-zone.has-data {
+            border-style: solid;
+            background: #f0fff4;
+            border-color: #48bb78;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #4a5568;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .status.loading {
+            background: #fffaf0;
+            color: #c05621;
+        }
+        
+        .status.success {
+            background: #f0fff4;
+            color: #276749;
+        }
+        
+        .status.error {
+            background: #fff5f5;
+            color: #c53030;
+        }
+        
+        .results-card {
+            grid-column: 1 / -1;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #f7fafc;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .match-score {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .match-score.high {
+            color: #48bb78;
+        }
+        
+        .match-score.medium {
+            color: #ed8936;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #2c5282;
+        }
+        
+        .file-info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Job Matching Dashboard</h1>
+            <p class="subtitle">AI-powered candidate-job matching using sentence embeddings</p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Candidates Upload -->
+            <div class="card">
+                <h2>📄 Candidate Profiles</h2>
+                <div class="upload-zone" id="candidate-upload">
+                    <p>📁 Drop CSV/Excel file here or click to upload</p>
+                    <p class="file-info">Expected columns: id, name, skills, experience_years, resume_text</p>
+                    <input type="file" id="candidate-file" accept=".csv,.xlsx,.xls" style="display:none">
+                </div>
+                <div id="candidate-status" class="status hidden"></div>
+                <div class="file-info" id="candidate-info"></div>
+            </div>
+            
+            <!-- Jobs Upload -->
+            <div class="card">
+                <h2>💼 Job Postings</h2>
+                <div class="upload-zone" id="job-upload">
+                    <p>📁 Drop CSV/Excel file here or click to upload</p>
+                    <p class="file-info">Expected columns: id, title, required_skills, description, experience_required</p>
+                    <input type="file" id="job-file" accept=".csv,.xlsx,.xls" style="display:none">
+                </div>
+                <div id="job-status" class="status hidden"></div>
+                <div class="file-info" id="job-info"></div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="card">
+                <h2>⚙️ Matching Settings</h2>
+                <div class="info-box">
+                    <strong>How it works:</strong> We generate sentence embeddings for both candidates and jobs, then calculate cosine similarity to find the best matches.
+                </div>
+                
+                <label style="display:block; margin: 15px 0;">
+                    <strong>Minimum Match Score:</strong>
+                    <input type="range" id="min-score" min="0" max="100" value="50" style="width:100%">
+                    <span id="min-score-value">50%</span>
+                </label>
+                
+                <label style="display:block; margin: 15px 0;">
+                    <strong>Top Matches per Candidate:</strong>
+                    <input type="number" id="top-n" min="1" max="20" value="5" style="width:100%; padding: 8px;">
+                </label>
+                
+                <button class="btn" id="generate-matches" disabled>
+                    🚀 Generate Matches
+                </button>
+                
+                <div id="match-progress" class="status hidden loading">
+                    <div>Generating embeddings...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div class="card results-card">
+                <h2>🎯 Match Results</h2>
+                <div id="results-placeholder" style="text-align:center; padding: 40px; color: #666;">
+                    Upload candidate and job data, then click "Generate Matches"
+                </div>
+                <div id="results-container" class="hidden">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div id="results-summary"></div>
+                        <button class="btn btn-secondary" id="export-results" style="width:auto;">
+                            📥 Export Results
+                        </button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table id="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Candidate</th>
+                                    <th>Job Title</th>
+                                    <th>Match Score</th>
+                                    <th>Key Skills Overlap</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

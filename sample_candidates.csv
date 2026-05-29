@@ -1,0 +1,9 @@
+id,name,skills,experience_years,resume_text
+1,Sarah Chen,"Python,Machine Learning,TensorFlow,SQL,Data Analysis",5,"Senior Data Scientist with expertise in building production ML models. Led team of 4 data scientists at tech startup. Published 3 papers on deep learning optimization."
+2,Michael Rodriguez,"JavaScript,React,Node.js,AWS,Docker",7,"Full-stack developer specializing in scalable web applications. Built microservices architecture serving 1M+ users. Strong DevOps background with CI/CD pipelines."
+3,Emily Watson,"Python,SQL,Tableau,Statistics,R",4,"Data Analyst transitioning to Data Science. Strong statistical background with MBA. Created dashboards used by C-suite executives for strategic decisions."
+4,James Park,"Java,Spring Boot,Kubernetes,Microservices,Azure",6,"Backend engineer focused on distributed systems. Designed event-driven architecture processing 100K events/second. Mentored junior developers."
+5,Aisha Patel,"Python,PyTorch,NLP,Transformers,Research",3,"ML Researcher with focus on natural language processing. Published at NeurIPS and ACL. Experience fine-tuning large language models for domain-specific tasks."
+6,David Thompson,"SQL,Power BI,Excel,Data Warehousing,ETL",8,"Senior Business Intelligence Analyst. Built enterprise data warehouse serving 500+ users. Expert in optimizing complex SQL queries and data modeling."
+7,Lisa Nguyen,"Python,Scikit-learn,Pandas,Airflow,GCP",4,"Data Engineer building ML pipelines. Automated data workflows reducing manual effort by 80%. Experience with real-time streaming data processing."
+8,Robert Kim,"C++,CUDA,Deep Learning,Computer Vision",5,"Computer Vision Engineer developing autonomous vehicle perception systems. Optimized neural networks for edge deployment. Patent holder in object detection."
